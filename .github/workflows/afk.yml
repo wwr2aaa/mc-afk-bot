@@ -1,0 +1,15 @@
+name: Minecraft AFK Bot
+on:
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download MCC
+        run: |
+          wget https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/latest/download/MinecraftClient-Linux-x64
+          chmod +x MinecraftClient-Linux-x64
+
+      - name: Run Minecraft Client
+        run: ./MinecraftClient-Linux-x64 "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
