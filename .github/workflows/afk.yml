@@ -1,7 +1,14 @@
 name: Minecraft AFK Bot
+
+# Эта магия следит, чтобы одновременно работал только один бот
+concurrency:
+  group: mc-bot-session
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   schedule:
+    # Запуск каждые 5 часов (00:00, 05:00, 10:00 и т.д.)
     - cron: '0 */5 * * *'
 
 jobs:
@@ -16,7 +23,7 @@ jobs:
       - name: Install Mineflayer
         run: npm install mineflayer prismarine-auth
 
-      # Пробуем скачать сохраненную сессию из артефактов
+      # Загружаем сохраненный логин из прошлых запусков
       - name: Download Session
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -34,14 +41,8 @@ jobs:
             profilesFolder: './nmp-cache'
           })
 
-          bot.on('login', () => {
-            console.log('Успех! Бот залогинился.')
-            // Как только залогинились - создаем файл-маяк для сохранения
-            const fs = require('fs')
-            fs.writeFileSync('logged_in.txt', 'true')
-          })
-          
-          bot.on('spawn', () => console.log('Персонаж в игре.'))
+          bot.on('login', () => console.log('Успех! Бот залогинился.'))
+          bot.on('spawn', () => console.log('Персонаж в игре. Жду следующего цикла.'))
           
           bot.on('microsoftAuth', (info) => {
             console.log('------------------------------------------')
@@ -49,14 +50,18 @@ jobs:
             console.log('ВВЕДИ ЭТОТ КОД:', info.user_code)
             console.log('------------------------------------------')
           })
+
+          // Чтобы процесс не закрывался сам по себе
+          bot.on('error', (err) => console.log('Ошибка бота:', err))
+          bot.on('kicked', (reason) => console.log('Бот кикнут:', reason))
           EOF
 
       - name: Run Bot
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
-        run: node bot.js & sleep 300 # Запускаем в фоне на 5 минут для теста или просто node bot.js
+        run: node bot.js
 
-      # Сохраняем сессию в любом случае, даже если бот был убит
+      # Сохраняем сессию в артефакты, чтобы в следующий раз зайти без кода
       - name: Save Session
         if: always()
         uses: actions/upload-artifact@v4
