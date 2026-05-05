@@ -8,7 +8,8 @@ jobs:
     steps:
       - name: Download MCC
         run: |
-          wget https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/latest/download/MinecraftClient-Linux-x64
+          # Скачиваем стабильную версию
+          wget https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/download/1.20.1/MinecraftClient-Linux-x64
           chmod +x MinecraftClient-Linux-x64
 
       - name: Run Minecraft Client
