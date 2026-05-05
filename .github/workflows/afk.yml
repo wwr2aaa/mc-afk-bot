@@ -6,15 +6,14 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Install MCC
+      - name: Download and Unpack MCC
         run: |
-          dotnet tool install -g MinecraftConsoleClient
-          echo "/home/runner/.dotnet/tools" >> $GITHUB_PATH
+          # 1. Скачиваем архив (универсальная версия)
+          wget https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/download/1.21/MinecraftClient-Linux-zlib-x64
+          
+          # 2. Даем права на запуск
+          chmod +x MinecraftClient-Linux-zlib-x64
 
       - name: Run Minecraft Client
-        run: MinecraftClient "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
+        # 3. Запускаем напрямую
+        run: ./MinecraftClient-Linux-zlib-x64 "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
