@@ -6,20 +6,43 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          dotnet-version: '8.0.x'
+          node-version: '20'
 
-      - name: Install and Run MCC
+      - name: Install Mineflayer
+        run: npm install mineflayer prismarine-auth
+
+      - name: Create Bot Script
         run: |
-          # Устанавливаем конкретную версию инструмента напрямую из NuGet
-          dotnet tool install -g MC-Console-Client --version 1.21.0-243
+          cat << EOF > bot.js
+          const mineflayer = require('mineflayer')
+          const bot = mineflayer.createBot({
+            host: process.env.SERVER_IP,
+            auth: 'microsoft'
+          })
+
+          bot.on('login', () => console.log('Успех! Бот залогинился.'))
+          bot.on('spawn', () => console.log('Персонаж в игре!'))
+          bot.on('error', (err) => {
+            if (err.message.includes('client_id')) {
+               console.log('Ждем код авторизации...')
+            } else {
+               console.log('Ошибка:', err)
+            }
+          })
           
-          # Добавляем путь к инструментам в систему
-          export PATH="$PATH:/home/runner/.dotnet/tools"
-          
-          # Запускаем под именем 'mcc' (или MinecraftClient)
-          # Если не сработает mcc, скрипт попробует другое имя автоматически
-          MinecraftClient "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}" || \
-          mcc "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
+          // Это выведет тот самый код для Microsoft в консоль
+          bot.on('microsoftAuth', (info) => {
+            console.log('------------------------------------------')
+            console.log('ПЕРЕЙДИ СЮДА:', info.user_code_url)
+            console.log('ВВЕДИ ЭТОТ КОД:', info.user_code)
+            console.log('------------------------------------------')
+          })
+          EOF
+
+      - name: Run Bot
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: node bot.js
