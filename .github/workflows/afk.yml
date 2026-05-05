@@ -5,9 +5,16 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    container:
-      image: mcrelease/mcc:latest # Используем официальный контейнер
     steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install MCC
+        run: |
+          dotnet tool install -g MinecraftConsoleClient
+          echo "/home/runner/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Run Minecraft Client
-        # В контейнере программа уже установлена и называется 'mcc'
-        run: mcc "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
+        run: MinecraftClient "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
