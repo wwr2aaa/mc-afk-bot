@@ -1,6 +1,5 @@
 name: Minecraft AFK Bot
 
-# Эта магия следит, чтобы одновременно работал только один бот
 concurrency:
   group: mc-bot-session
   cancel-in-progress: true
