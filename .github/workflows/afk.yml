@@ -6,22 +6,12 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Download MCC (Auto-Detect)
+      - name: Download MCC
         run: |
-          # 1. Получаем ссылку на самый свежий файл для Linux через API GitHub
-          URL=$(curl -s https://api.github.com/repos/MC-Console-Client/Minecraft-Console-Client/releases/latest | grep "browser_download_url" | grep "Linux" | grep "x64" | head -n 1 | cut -d '"' -f 4)
-          
-          if [ -z "$URL" ]; then
-            echo "Ошибка: Не удалось найти ссылку на файл. Попробуем запасной вариант..."
-            URL="https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/download/1.21/MinecraftClient-Linux-zlib-x64"
-          fi
-          
-          echo "Скачиваю отсюда: $URL"
-          
-          # 2. Скачиваем и называем файл просто 'mcc'
-          curl -L -o mcc "$URL"
+          # Скачиваем проверенную версию 1.20.1, она точно доступна
+          curl -L -o mcc https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/download/1.20.1/MinecraftClient-Linux-x64
           chmod +x mcc
 
       - name: Run Minecraft Client
-        # 3. Запускаем наш файл 'mcc'
+        # Запускаем файл
         run: ./mcc "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
