@@ -6,11 +6,23 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Download MCC
+      - name: Download MCC (Smart Link)
         run: |
-          # Скачиваем стабильную версию
-          wget https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/download/1.20.1/MinecraftClient-Linux-x64
+          # Этот скрипт сам найдет самую последнюю версию и ссылку на нее
+          DOWNLOAD_URL=$(curl -s https://api.github.com/repos/MC-Console-Client/Minecraft-Console-Client/releases/latest | grep "browser_download_url.*Linux-x64" | cut -d '"' -f 4)
+          
+          # Простая проверка, что мы нашли ссылку
+          if [ -z "$DOWNLOAD_URL" ]; then
+            echo "Error: Could not find the download URL."
+            exit 1
+          fi
+          
+          echo "Found download URL: $DOWNLOAD_URL"
+          
+          # Скачиваем файл по найденной ссылке
+          wget -O MinecraftClient-Linux-x64 "$DOWNLOAD_URL"
           chmod +x MinecraftClient-Linux-x64
 
       - name: Run Minecraft Client
+        # Теперь запускаем то, что скачали
         run: ./MinecraftClient-Linux-x64 "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
