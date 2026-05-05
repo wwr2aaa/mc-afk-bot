@@ -6,14 +6,18 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Download and Unpack MCC
-        run: |
-          # 1. Скачиваем архив (универсальная версия)
-          wget https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/download/1.21/MinecraftClient-Linux-zlib-x64
-          
-          # 2. Даем права на запуск
-          chmod +x MinecraftClient-Linux-zlib-x64
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          repository: MC-Console-Client/Minecraft-Console-Client
+          ref: master
 
-      - name: Run Minecraft Client
-        # 3. Запускаем напрямую
-        run: ./MinecraftClient-Linux-zlib-x64 "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build and Run
+        run: |
+          cd MinecraftClient
+          dotnet run -- "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
