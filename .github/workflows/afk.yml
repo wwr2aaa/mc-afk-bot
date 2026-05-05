@@ -1,6 +1,9 @@
 name: Minecraft AFK Bot
 on:
   workflow_dispatch:
+  schedule:
+    # Автоматический запуск каждые 5 часов
+    - cron: '0 */5 * * *'
 
 jobs:
   run-bot:
@@ -14,17 +17,27 @@ jobs:
       - name: Install Mineflayer
         run: npm install mineflayer prismarine-auth
 
+      - name: Cache Microsoft Auth
+        uses: actions/cache@v4
+        with:
+          path: ./nmp-cache
+          key: ${{ runner.os }}-mcc-auth-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-mcc-auth-
+
       - name: Create Bot Script
         run: |
           cat << EOF > bot.js
           const mineflayer = require('mineflayer')
           const bot = mineflayer.createBot({
             host: process.env.SERVER_IP,
-            auth: 'microsoft'
+            auth: 'microsoft',
+            profilesFolder: './nmp-cache'
           })
 
           bot.on('login', () => console.log('Успех! Бот залогинился.'))
-          bot.on('spawn', () => console.log('Персонаж в игре!'))
+          bot.on('spawn', () => console.log('Персонаж в игре и стоит на месте.'))
+
           bot.on('error', (err) => {
             if (err.message.includes('client_id')) {
                console.log('Ждем код авторизации...')
@@ -33,7 +46,6 @@ jobs:
             }
           })
           
-          // Это выведет тот самый код для Microsoft в консоль
           bot.on('microsoftAuth', (info) => {
             console.log('------------------------------------------')
             console.log('ПЕРЕЙДИ СЮДА:', info.user_code_url)
