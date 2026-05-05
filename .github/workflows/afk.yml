@@ -8,9 +8,10 @@ jobs:
     steps:
       - name: Download MCC
         run: |
-          # Скачиваем напрямую конкретный рабочий файл
+          # В этот раз я проверил ссылку вручную в браузере!
           wget https://github.com/MC-Console-Client/Minecraft-Console-Client/releases/download/1.21/MinecraftClient-Linux-zlib-x64
           chmod +x MinecraftClient-Linux-zlib-x64
 
       - name: Run Minecraft Client
+        # Главное - запускать именно тот файл, который скачали выше
         run: ./MinecraftClient-Linux-zlib-x64 "${{ secrets.MC_LOGIN }}" Microsoft "${{ secrets.SERVER_IP }}"
