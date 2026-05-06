@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   schedule:
     # Запуск каждые 5 часов (00:00, 05:00, 10:00 и т.д.)
-    - cron: '0 */5 * * *'
+    - cron: '0 */6 * * *'
 
 jobs:
   run-bot:
